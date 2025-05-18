@@ -136,6 +136,10 @@ module.exports = {
           .get(`${config.tileServerURL}/staticmap/nest-bot?pregenerate=true&regeneratable=true&${params.toString()}`)
           .buffer(true);
 
+        // Debug: log buffer info and save to disk
+        console.log('Map buffer size:', res.body.length, 'First bytes:', res.body.slice(0, 16));
+        fs.writeFileSync(`debug_map_${Date.now()}.png`, res.body);
+
         const fileName = `map_${Date.now()}.png`;
         if (
           Buffer.isBuffer(res.body) &&
