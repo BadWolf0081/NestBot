@@ -137,8 +137,13 @@ module.exports = {
           .buffer(true);
 
         // Debug: log buffer info and save to disk
-        console.log('Map buffer size:', res.body.length, 'First bytes:', res.body.slice(0, 16));
-        fs.writeFileSync(`debug_map_${Date.now()}.png`, res.body);
+        if (Buffer.isBuffer(res.body)) {
+          console.log('Map buffer size:', res.body.length, 'First bytes:', res.body.slice(0, 16));
+          fs.writeFileSync(`debug_map_${Date.now()}.png`, res.body);
+        } else {
+          console.log('Map response is not a buffer. Type:', typeof res.body);
+          console.log('Map response (stringified):', JSON.stringify(res.body).slice(0, 500));
+        }
 
         const fileName = `map_${Date.now()}.png`;
         if (
