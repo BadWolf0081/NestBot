@@ -108,6 +108,9 @@ module.exports = {
 
     //Find center/zoom
     let tileData = await this.findCenterZoom(points, config.tileWidth, config.tileHeight);
+    let zoom = (tileData && typeof tileData.zoom === 'number' && !isNaN(tileData.zoom))
+      ? tileData.zoom
+      : (config.defaultZoom || 15); // fallback zoom
     var miniMapLink = '';
 
     //Create embed
@@ -125,11 +128,13 @@ module.exports = {
         const params = new URLSearchParams({
           height: config.tileHeight,
           width: config.tileWidth,
-          lat: tileData.latitude,
-          lon: tileData.longitude,
-          zoom: tileData.zoom,
+          lat: tileData ? tileData.latitude : 0,
+          lon: tileData ? tileData.longitude : 0,
+          zoom: zoom,
           nestjson: JSON.stringify(markers)
         });
+
+        console.log('Requesting map with zoom:', zoom, 'lat:', tileData ? tileData.latitude : 0, 'lon:', tileData ? tileData.longitude : 0);
 
         // Use GET request
         const res = await superagent
