@@ -85,9 +85,12 @@ async function cronUpdates() {
       let message = await channel.messages.fetch(msgID);
 
       // nestEmbedInfo[2] is the attachment if present
-      const editPayload = nestEmbedInfo[2]
-        ? { embeds: [nestEmbedInfo[0]], files: [nestEmbedInfo[2]] }
-        : { embeds: [nestEmbedInfo[0]] };
+      let editPayload;
+      if (nestEmbedInfo[2] && Buffer.isBuffer(nestEmbedInfo[2].attachment)) {
+        editPayload = { embeds: [nestEmbedInfo[0]], files: [nestEmbedInfo[2]] };
+      } else {
+        editPayload = { embeds: [nestEmbedInfo[0]] };
+      }
 
       await message.edit(editPayload).catch(console.error);
     } catch (err) {

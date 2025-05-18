@@ -137,13 +137,17 @@ module.exports = {
           .buffer(true);
 
         const fileName = `map_${Date.now()}.png`;
-        const attachment = {
-          attachment: res.body,
-          name: fileName
-        };
-
-        nestEmbed.setImage(`attachment://${fileName}`);
-        return [nestEmbed, areaName, attachment];
+        if (Buffer.isBuffer(res.body)) {
+          const attachment = {
+            attachment: res.body,
+            name: fileName
+          };
+          nestEmbed.setImage(`attachment://${fileName}`);
+          return [nestEmbed, areaName, attachment];
+        } else {
+          // fallback: no attachment
+          return [nestEmbed, areaName];
+        }
       } catch (err) {
         console.error(`Map error for area ${areaName}`);
         console.error(err);
