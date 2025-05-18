@@ -137,7 +137,18 @@ module.exports = {
           .buffer(true);
 
         const fileName = `map_${Date.now()}.png`;
-        if (Buffer.isBuffer(res.body)) {
+        if (
+          Buffer.isBuffer(res.body) &&
+          res.body.length > 8 &&
+          res.body[0] === 0x89 &&
+          res.body[1] === 0x50 &&
+          res.body[2] === 0x4E &&
+          res.body[3] === 0x47 &&
+          res.body[4] === 0x0D &&
+          res.body[5] === 0x0A &&
+          res.body[6] === 0x1A &&
+          res.body[7] === 0x0A
+        ) {
           const attachment = {
             attachment: res.body,
             name: fileName
