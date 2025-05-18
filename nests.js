@@ -83,9 +83,13 @@ async function cronUpdates() {
       let nestEmbedInfo = await Boards.fetchAreaNests(client, msgInfo.areaName, config, master, shinies);
       let channel = await client.channels.fetch(msgInfo.channelId).catch(console.error);
       let message = await channel.messages.fetch(msgID);
-      await message.edit({
-        embeds: [nestEmbedInfo[0]],
-      }).catch(console.error);
+
+      // nestEmbedInfo[2] is the attachment if present
+      const editPayload = nestEmbedInfo[2]
+        ? { embeds: [nestEmbedInfo[0]], files: [nestEmbedInfo[2]] }
+        : { embeds: [nestEmbedInfo[0]] };
+
+      await message.edit(editPayload).catch(console.error);
     } catch (err) {
       console.log(err);
     }

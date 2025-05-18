@@ -121,7 +121,9 @@ module.exports = {
     //Nests with map
     else if (config.tileServerURL) {
       try {
-        const res = await superagent.post(`${config.tileServerURL}/staticmap/nest-bot?pregenerate=true&regeneratable=true`)
+        // Request the image as a buffer
+        const res = await superagent
+          .post(`${config.tileServerURL}/staticmap/nest-bot?pregenerate=true&regeneratable=true`)
           .send({
             "height": config.tileHeight,
             "width": config.tileWidth,
@@ -129,8 +131,22 @@ module.exports = {
             "lon": tileData.longitude,
             "zoom": tileData.zoom,
             "nestjson": markers
-          });
-        nestEmbed.setImage(`${config.tileServerURL}/staticmap/pregenerated/${res.text}`);
+          })
+          .buffer(true)
+          .parse(superagent.parse.image);
+
+        // Prepare the attachment
+        const fileName = `map_${Date.now()}.png`;
+        const attachment = {
+          attachment: res.body,
+          name: fileName
+        };
+
+        // Set the embed image to the attachment
+        nestEmbed.setImage(`attachment://${fileName}`);
+
+        // Return the embed and the attachment (caller must handle sending)
+        return [nestEmbed, areaName, attachment];
       } catch (err) {
         console.error(`Map error for area ${areaName}`);
         console.error(err);

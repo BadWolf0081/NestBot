@@ -22,9 +22,13 @@ module.exports = {
         }).catch(console.error);
         let nestEmbedInfo = await Boards.fetchAreaNests(client, interaction.options.getString('area'), config, master, shinies);
         await interaction.deleteReply().catch(console.error);
-        await interaction.channel.send({
-                embeds: [nestEmbedInfo[0]]
-            })
+
+        // nestEmbedInfo[2] is the attachment if present
+        const sendPayload = nestEmbedInfo[2]
+            ? { embeds: [nestEmbedInfo[0]], files: [nestEmbedInfo[2]] }
+            : { embeds: [nestEmbedInfo[0]] };
+
+        await interaction.channel.send(sendPayload)
             .then(msg => {
                 var nestBoards = JSON.parse(fs.readFileSync('./nestBoards.json'));
                 nestBoards[msg.id] = {
