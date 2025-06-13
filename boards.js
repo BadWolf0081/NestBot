@@ -130,7 +130,26 @@ module.exports = {
             "zoom": tileData.zoom,
             "nestjson": markers
           });
-        nestEmbed.setImage(`${config.tileServerURL}/staticmap/pregenerated/${res.text}`);
+
+        // 2. Download the image to a temp file
+        const imageUrl = `${config.tileServerURL}/staticmap/pregenerated/${res.text}`;
+        const tempFilePath = `./temp_nestmap_${Date.now()}.png`;
+        const imageRes = await superagent.get(imageUrl).responseType('blob');
+        fs.writeFileSync(tempFilePath, imageRes.body);
+
+        // 3. Upload to dummy channel
+        const dummyChannel = await client.channels.fetch(config.dummyChannelId);
+        const uploadMsg = await dummyChannel.send({ files: [tempFilePath] });
+
+        // 4. Get the CDN URL
+        const cdnUrl = uploadMsg.attachments.first().url;
+
+        // 5. Set embed image to CDN URL
+        nestEmbed.setImage(cdnUrl);
+
+        // 6. Clean up temp file
+        fs.unlinkSync(tempFilePath);
+
       } catch (err) {
         console.error(`Map error for area ${areaName}`);
         console.error(err);
