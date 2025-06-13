@@ -26,7 +26,8 @@
   "tileServerURL": "",
   "tileWidth": 1000,
   "tileHeight": 600,
-  "dummyChannelId": "1383124439583031416",
+  "dummyChannelId": "",
+  "enableDummyUpload": false,
   "noNestsFound": "No nests found.",
   "emojis": {
     "type-grass": "🌿",

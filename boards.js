@@ -131,24 +131,29 @@ module.exports = {
             "nestjson": markers
           });
 
-        // 2. Download the image to a temp file
         const imageUrl = `${config.tileServerURL}/staticmap/pregenerated/${res.text}`;
-        const tempFilePath = `./temp_nestmap_${Date.now()}.png`;
-        const imageRes = await superagent.get(imageUrl).responseType('blob');
-        fs.writeFileSync(tempFilePath, imageRes.body);
 
-        // 3. Upload to dummy channel
-        const dummyChannel = await client.channels.fetch(config.dummyChannelId);
-        const uploadMsg = await dummyChannel.send({ files: [tempFilePath] });
+        // Only upload to dummy channel if enabled and dummyChannelId is set
+        if (
+          config.enableDummyUpload === true &&
+          config.dummyChannelId &&
+          typeof config.dummyChannelId === "string" &&
+          config.dummyChannelId.trim() !== ""
+        ) {
+          const tempFilePath = `./temp_nestmap_${Date.now()}.png`;
+          const imageRes = await superagent.get(imageUrl).responseType('blob');
+          fs.writeFileSync(tempFilePath, imageRes.body);
 
-        // 4. Get the CDN URL
-        const cdnUrl = uploadMsg.attachments.first().url;
+          const dummyChannel = await client.channels.fetch(config.dummyChannelId);
+          const uploadMsg = await dummyChannel.send({ files: [tempFilePath] });
+          const cdnUrl = uploadMsg.attachments.first().url;
+          nestEmbed.setImage(cdnUrl);
 
-        // 5. Set embed image to CDN URL
-        nestEmbed.setImage(cdnUrl);
-
-        // 6. Clean up temp file
-        fs.unlinkSync(tempFilePath);
+          fs.unlinkSync(tempFilePath);
+        } else {
+          // Fallback: just use the direct image URL
+          nestEmbed.setImage(imageUrl);
+        }
 
       } catch (err) {
         console.error(`Map error for area ${areaName}`);
