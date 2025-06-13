@@ -183,11 +183,18 @@ module.exports = {
     const longitude = minLon + ((maxLon - minLon) / 2.0)
     const ne = [maxLat, maxLon]
     const sw = [minLat, minLon]
-    if (ne === sw) {
+
+    // If only one point, pad the bounds slightly
+    if (objs.length === 1) {
+      const pad = 0.002; // ~200m, adjust as needed
       return {
         zoom: defaultZoom,
         latitude: lats[0],
         longitude: lons[0],
+        bounds: {
+          ne: [lats[0] + pad, lons[0] + pad],
+          sw: [lats[0] - pad, lons[0] - pad]
+        }
       }
     }
 
