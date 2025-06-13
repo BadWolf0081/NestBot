@@ -165,9 +165,19 @@ module.exports = {
       } catch (err) {
         console.error(`Map error for area ${areaName}`);
         console.error(err);
-        // Always set the fallback image if anything fails
-        const imageUrl = `${config.tileServerURL}/staticmap/pregenerated/${typeof res !== "undefined" && res.text ? res.text : "unknown"}`;
-        nestEmbed.setImage(imageUrl);
+        // Fallback: just use the direct image URL if possible
+        if (typeof config.tileServerURL === "string" && config.tileServerURL.length > 0) {
+          // Try to use the last attempted filename if available
+          let fallbackImage = "";
+          if (err && err.response && err.response.text) {
+            fallbackImage = `${config.tileServerURL}/staticmap/pregenerated/${err.response.text}`;
+          } else if (typeof res !== "undefined" && res.text) {
+            fallbackImage = `${config.tileServerURL}/staticmap/pregenerated/${res.text}`;
+          } else {
+            fallbackImage = config.tileServerURL; // fallback to base URL if all else fails
+          }
+          nestEmbed.setImage(fallbackImage);
+        }
       }
       return [nestEmbed, areaName];
     }
