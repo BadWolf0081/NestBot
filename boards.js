@@ -133,6 +133,7 @@ module.exports = {
           });
 
         imageUrl = `${config.tileServerURL}/staticmap/pregenerated/${res.text}`;
+        console.log(`[NestBot] Generated imageUrl: ${imageUrl}`);
 
         if (
           config.enableDummyUpload === true &&
@@ -151,7 +152,6 @@ module.exports = {
 
           fs.unlinkSync(tempFilePath);
         } else {
-          // Fallback: just use the direct image URL
           console.error(
             `[NestBot] Dummy upload skipped. Reason: ${
               !config.enableDummyUpload ? "enableDummyUpload is false" :
@@ -160,16 +160,18 @@ module.exports = {
             }. Using direct image URL instead.`
           );
           nestEmbed.setImage(imageUrl);
+          console.log(`[NestBot] Set embed image to: ${imageUrl}`);
         }
 
       } catch (err) {
         console.error(`Map error for area ${areaName}`);
         console.error(err);
-        // Always set the image using the imageUrl if available
         if (imageUrl) {
           nestEmbed.setImage(imageUrl);
+          console.log(`[NestBot] Set embed image to (catch): ${imageUrl}`);
         } else if (typeof config.tileServerURL === "string" && config.tileServerURL.length > 0) {
           nestEmbed.setImage(config.tileServerURL);
+          console.log(`[NestBot] Set embed image to (catch, fallback): ${config.tileServerURL}`);
         }
       }
       return [nestEmbed, areaName];
