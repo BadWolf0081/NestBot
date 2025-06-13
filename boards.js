@@ -152,12 +152,22 @@ module.exports = {
           fs.unlinkSync(tempFilePath);
         } else {
           // Fallback: just use the direct image URL
+          console.error(
+            `[NestBot] Dummy upload skipped. Reason: ${
+              !config.enableDummyUpload ? "enableDummyUpload is false" :
+              !config.dummyChannelId || config.dummyChannelId.trim() === "" ? "dummyChannelId not set" :
+              "Unknown"
+            }. Using direct image URL instead.`
+          );
           nestEmbed.setImage(imageUrl);
         }
 
       } catch (err) {
         console.error(`Map error for area ${areaName}`);
         console.error(err);
+        // Always set the fallback image if anything fails
+        const imageUrl = `${config.tileServerURL}/staticmap/pregenerated/${typeof res !== "undefined" && res.text ? res.text : "unknown"}`;
+        nestEmbed.setImage(imageUrl);
       }
       return [nestEmbed, areaName];
     }
