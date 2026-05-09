@@ -111,7 +111,10 @@ module.exports = {
     var miniMapLink = '';
 
     //Create embed
-    nestEmbed = new EmbedBuilder().setTitle(title).setDescription(boardEntries.join('\n')).setTimestamp();
+    const boardDescription = boardEntries.length > 0
+      ? boardEntries.join('\n')
+      : (config.noNestsFound ? config.noNestsFound : 'No nests found.');
+    const nestEmbed = new EmbedBuilder().setTitle(title).setDescription(boardDescription).setTimestamp();
 
     //No nests
     if (areaResults.length == 0) {

@@ -180,10 +180,16 @@ client.on('interactionCreate', async interaction => {
     let slashReturn = await command.execute(client, interaction, config, master, shinies);
   } catch (error) {
     console.error(error);
-    await interaction.reply({
+    const errorReply = {
       content: 'There was an error while executing this command!',
       ephemeral: true
-    }).catch(console.error);
+    };
+
+    if (interaction.replied || interaction.deferred) {
+      await interaction.followUp(errorReply).catch(console.error);
+    } else {
+      await interaction.reply(errorReply).catch(console.error);
+    }
   }
 }); //End of slash commands
 
