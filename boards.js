@@ -136,7 +136,7 @@ module.exports = {
         console.log('Requesting map with zoom:', zoom, 'lat:', tileData ? tileData.latitude : 0, 'lon:', tileData ? tileData.longitude : 0);
 
         const res = await superagent
-          .post(`${config.tileServerURL}/staticmap/nest-bot?pregenerate=true&regeneratable=true`)
+          .post(`${config.tileServerURL}/staticmap/nest-bot`)
           .send(mapEnvironment)
           .buffer(true);
 
