@@ -124,21 +124,20 @@ module.exports = {
     //Nests with map
     else if (config.tileServerURL) {
       try {
-        // Build query parameters
-        const params = new URLSearchParams({
+        const mapEnvironment = {
           height: config.tileHeight,
           width: config.tileWidth,
           lat: tileData ? tileData.latitude : 0,
           lon: tileData ? tileData.longitude : 0,
           zoom: zoom,
-          nestjson: JSON.stringify(markers)
-        });
+          nestjson: markers
+        };
 
         console.log('Requesting map with zoom:', zoom, 'lat:', tileData ? tileData.latitude : 0, 'lon:', tileData ? tileData.longitude : 0);
 
-        // Use GET request
         const res = await superagent
-          .get(`${config.tileServerURL}/staticmap/nest-bot?pregenerate=true&regeneratable=true&${params.toString()}`)
+          .post(`${config.tileServerURL}/staticmap/nest-bot?pregenerate=true&regeneratable=true`)
+          .send(mapEnvironment)
           .buffer(true);
 
         // Debug: log buffer info and save to disk
