@@ -114,10 +114,7 @@ module.exports = {
     var miniMapLink = '';
 
     //Create embed
-    const boardDescription = boardEntries.length > 0
-      ? boardEntries.join('\n')
-      : (config.noNestsFound ? config.noNestsFound : 'No nests found.');
-    const nestEmbed = new EmbedBuilder().setTitle(title).setDescription(boardDescription).setTimestamp();
+    nestEmbed = new EmbedBuilder().setTitle(title).setDescription(boardEntries.join('\n')).setTimestamp();
 
     //No nests
     if (areaResults.length == 0) {
@@ -126,7 +123,6 @@ module.exports = {
     }
     //Nests with map
     else if (config.tileServerURL) {
-      let imageUrl = "";
       try {
         // Build query parameters
         const params = new URLSearchParams({
@@ -177,44 +173,9 @@ module.exports = {
           // fallback: no attachment
           return [nestEmbed, areaName];
         }
-        const res = await superagent.post(`${config.tileServerURL}/staticmap/nest-bot?pregenerate=true&regeneratable=true`)
-          .send({
-            "height": config.tileHeight,
-            "width": config.tileWidth,
-            "lat": tileData.latitude,
-            "lon": tileData.longitude,
-            "zoom": tileData.zoom,
-            "nestjson": markers
-          });
-
-        imageUrl = `${config.tileServerURL}/staticmap/pregenerated/${res.text}`;
-
-        if (
-          config.enableDummyUpload === true &&
-          config.dummyChannelId &&
-          typeof config.dummyChannelId === "string" &&
-          config.dummyChannelId.trim() !== ""
-        ) {
-          const tempFilePath = `./temp_nestmap_${Date.now()}.png`;
-          const imageRes = await superagent.get(imageUrl).responseType('blob');
-          fs.writeFileSync(tempFilePath, imageRes.body);
-
-          const dummyChannel = await client.channels.fetch(config.dummyChannelId);
-          const uploadMsg = await dummyChannel.send({ files: [tempFilePath] });
-          const cdnUrl = uploadMsg.attachments.first().url;
-          nestEmbed.setImage(cdnUrl);
-
-          fs.unlinkSync(tempFilePath);
-        } else {
-          nestEmbed.setImage(imageUrl);
-        }
-
       } catch (err) {
-        if (imageUrl) {
-          nestEmbed.setImage(imageUrl);
-        } else if (typeof config.tileServerURL === "string" && config.tileServerURL.length > 0) {
-          nestEmbed.setImage(config.tileServerURL);
-        }
+        console.error(`Map error for area ${areaName}`);
+        console.error(err);
       }
       return [nestEmbed, areaName];
     }
@@ -245,18 +206,11 @@ module.exports = {
     const longitude = minLon + ((maxLon - minLon) / 2.0)
     const ne = [maxLat, maxLon]
     const sw = [minLat, minLon]
-
-    // If only one point, pad the bounds slightly
-    if (objs.length === 1) {
-      const pad = 0.002; // ~200m, adjust as needed
+    if (ne === sw) {
       return {
         zoom: defaultZoom,
         latitude: lats[0],
         longitude: lons[0],
-        bounds: {
-          ne: [lats[0] + pad, lons[0] + pad],
-          sw: [lats[0] - pad, lons[0] - pad]
-        }
       }
     }
 
